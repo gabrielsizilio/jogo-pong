@@ -3,6 +3,9 @@
 #include <map>
 #include <iostream>
 
+enum Difficulty { EASY, MEDIUM, HARD };
+Difficulty currentDifficulty = MEDIUM;
+
 // Armazena o estado das teclas
 std::map<unsigned char, bool> keyStates;
 std::map<int, bool> specialKeyStates;
@@ -34,6 +37,30 @@ int score2 = 0;
 // Especial
 int specialPlayer1 = 0;
 int specialPlayer2 = 0;
+
+void setDifficulty(Difficulty difficulty) {
+    switch (difficulty)
+    {
+    case EASY:
+        ballXSpeed = 3.0f;
+        ballYSpeed = 3.0f;
+        barHeight = 150.0f;
+        break;
+    case MEDIUM:
+        ballXSpeed = 5.0f;
+        ballYSpeed = 5.0f;
+        barHeight = 100.0f;
+        break;
+    case HARD:
+        ballXSpeed = 8.0f;
+        ballYSpeed = 8.0f;
+        barHeight = 50.0f;
+        break;
+    
+    default:
+        break;
+    }
+}
 
 void handleKeysDown(unsigned char key, int x, int y)
 {
@@ -273,6 +300,7 @@ int main(int argc, char **argv)
     glutSpecialFunc(handleKeysDownSpecial);
     glutSpecialUpFunc(handleKeysUpSpecial);
     glutReshapeFunc(reshape);
+    setDifficulty(EASY);
 
     glutMainLoop();
     return 0;
