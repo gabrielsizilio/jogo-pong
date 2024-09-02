@@ -1,5 +1,11 @@
 // Código base (inicial) para implementação do TP3 de CG
 #include <GL/glut.h>
+#include <map>
+#include <iostream>
+
+// Armazena o estado das teclas
+std::map<unsigned char, bool> keyStates;
+std::map<int, bool> specialKeyStates;
 
 // Tamanho da janela
 const int width = 800;
@@ -28,6 +34,26 @@ int score2 = 0;
 // Especial
 int specialPlayer1 = 0;
 int specialPlayer2 = 0;
+
+void handleKeysDown(unsigned char key, int x, int y)
+{
+    keyStates[key] = true; // Marca a tecla como pressionada
+}
+
+void handleKeysUp(unsigned char key, int x, int y)
+{
+    keyStates[key] = false; // Marca a tecla como liberada
+}
+
+void handleKeysDownSpecial(int key, int x, int y)
+{
+    specialKeyStates[key] = true; // Marca a tecla especial como pressionada
+}
+
+void handleKeysUpSpecial(int key, int x, int y)
+{
+    specialKeyStates[key] = false; // Marca a tecla especial como liberada
+}
 
 void playerLeft()
 {
@@ -105,22 +131,21 @@ void update(int value)
     ballY += ballYSpeed;
 
     // Espaço para a lógica de movimentação das barras
-    if (bar1Y + barHeight > height)
-    {
-        bar1Y -= 10;
-    }
-    if (bar1Y < 0)
-    {
+    if ((keyStates['w'] || keyStates['W']) && (bar1Y + barHeight < height)) {
         bar1Y += 10;
+        if(bar1Y + barHeight > height) bar1Y = height - barHeight;
     }
-
-    if (bar2Y + barHeight > height)
-    {
-        bar2Y -= 10;
+    if ((keyStates['s'] || keyStates['S']) && (bar1Y > 0)) {
+        bar1Y -= 10;
+        if(bar1Y < 0) bar1Y = 0; 
     }
-    if (bar2Y < 0)
-    {
+    if (specialKeyStates[GLUT_KEY_UP] && bar2Y + barHeight < height) {
         bar2Y += 10;
+        if(bar2Y + barHeight > height) bar2Y = height - barHeight;
+    }
+    if (specialKeyStates[GLUT_KEY_DOWN] && bar2Y > 0) {
+        bar2Y -= 10;
+        if(bar2Y < 0) bar2Y = 0;
     }
 
     // Espaço para a lógica de movimentação e colisão da bola
@@ -190,12 +215,8 @@ void update(int value)
         if (direction % 2 == 0)
         {
             ballYSpeed = -ballYSpeed;
-            direction = -direction;
         }
-        else
-        {
-            direction = -direction;
-        }
+        direction = -direction;
     }
 
     if (ballX - ballSize / 2 <= 0)
@@ -215,58 +236,12 @@ void update(int value)
         if (direction % 2 == 0)
         {
             ballYSpeed = -ballYSpeed;
-            direction = -direction;
         }
-        else
-        {
-            direction = -direction;
-        }
+        direction = -direction;
     }
 
     glutPostRedisplay();
     glutTimerFunc(16, update, 0); // Aproximadamente 60 FPS
-}
-
-void handleKeysDown(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-    case 's':
-    case 'S':
-        bar1Y -= 10;
-        break;
-
-    case 'w':
-    case 'W':
-        bar1Y += 10;
-        break;
-
-    default:
-        break;
-    }
-}
-
-void handleKeysDownSpecial(int key, int x, int y)
-{
-    // Espaço para configurar o estado das teclas ao pressionar
-    switch (key)
-    {
-    case GLUT_KEY_DOWN:
-        bar2Y -= 10;
-        break;
-
-    case GLUT_KEY_UP:
-        bar2Y += 10;
-        break;
-
-    default:
-        break;
-    }
-}
-
-void handleKeysUp(unsigned char key, int x, int y)
-{
-    // Espaço para configurar o estado das teclas ao soltar
 }
 
 // Função para evitar o redimensionamento da janela
@@ -294,8 +269,9 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutTimerFunc(16, update, 0);
     glutKeyboardFunc(handleKeysDown);
-    glutSpecialFunc(handleKeysDownSpecial);
     glutKeyboardUpFunc(handleKeysUp);
+    glutSpecialFunc(handleKeysDownSpecial);
+    glutSpecialUpFunc(handleKeysUpSpecial);
     glutReshapeFunc(reshape);
 
     glutMainLoop();
