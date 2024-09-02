@@ -1,3 +1,5 @@
 .vscode
 makefile
 game
+*.out
+*.exe
