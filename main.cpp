@@ -3,7 +3,7 @@
 #include <map>
 #include <iostream>
 
-#define WINNERSCORE 10
+#define WINNERSCORE 1
 
 enum Difficulty
 {
@@ -40,9 +40,6 @@ float ballYSpeed = 5.0f;
 // Placar
 int score1 = 0;
 int score2 = 0;
-
-// Campeão: 1 = playerLeft win | 2 = playerRight win
-int winner = 0;
 
 void setDifficulty(Difficulty difficulty)
 {
@@ -123,42 +120,42 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Se ainda não existir um campeão
-    if (winner == 0)
+    // Desenha o placar
+    glRasterPos2f(width / 2 - 50, height - 50);
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score1);
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '-');
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score2);
+
+    // Espaço para desenhar as barras e a bola
+    // BOLA
+    glPushMatrix();
+    ball();
+    glPopMatrix();
+
+    // BARRA-LEFT
+    glPushMatrix();
+    playerLeft();
+    glPopMatrix();
+
+    // BARRA-RIGHT
+    glPushMatrix();
+    playerRight(barHeight);
+    glPopMatrix();
+
+    glutSwapBuffers();
+}
+
+void dislpayWinner()
+{
+    const char *winner = (score1 == WINNERSCORE) ? "Player left win!" : "Player right win!";
+
+    // Definindo a posição onde a mensagem será exibida
+    glRasterPos2f(width / 2 - 50, height - 100);
+    for (const char *c = winner; *c != '\0'; c++)
     {
-        // Desenha o placar
-        glRasterPos2f(width / 2 - 50, height - 50);
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score1);
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '-');
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score2);
-
-        // Espaço para desenhar as barras e a bola
-        // BOLA
-        glPushMatrix();
-        ball();
-        glPopMatrix();
-
-        // BARRA-LEFT
-        glPushMatrix();
-        playerLeft();
-        glPopMatrix();
-
-        // BARRA-RIGHT
-        glPushMatrix();
-        playerRight(barHeight);
-        glPopMatrix();
-    }
-    else
-    {
-        // Mensagem de vitória
-        const char *winner = (score1 == WINNERSCORE) ? "Player left win!" : "Player right win!";
-        glRasterPos2f(width / 2 - 50, height / 2);
-        for (const char *c = winner; *c != '\0'; c++)
-        {
-            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        }
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
     }
 
     glutSwapBuffers();
@@ -166,25 +163,19 @@ void display()
 
 void update(int value)
 {
-    // Verifica se existe um vencedor
-    if (winner != 0)
-    {
-        return;
-    }
-
     // Lógica de atualização do jogo, incluindo movimentação das barras e bola
     ballX += ballXSpeed;
     ballY += ballYSpeed;
 
     if (score1 == WINNERSCORE)
     {
-        winner = 1;
+        dislpayWinner();
         return;
     }
 
     if (score2 == WINNERSCORE)
     {
-        winner = 2;
+        dislpayWinner();
         return;
     }
 
@@ -254,9 +245,6 @@ void update(int value)
 
         ballX = width / 2;
         ballY = height / 2;
-        // TODO: ALTERAR PARA VELOCIDADE DA DIFICULDADE
-        ballXSpeed = 5.0f;
-        ballYSpeed = 5.0f;
 
         ballXSpeed = -ballXSpeed;
 
@@ -273,8 +261,6 @@ void update(int value)
 
         ballX = width / 2;
         ballY = height / 2;
-        ballXSpeed = -5.0f;
-        ballYSpeed = -5.0f;
 
         ballXSpeed = -ballXSpeed;
 
