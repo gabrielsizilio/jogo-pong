@@ -3,7 +3,14 @@
 #include <map>
 #include <iostream>
 
-enum Difficulty { EASY, MEDIUM, HARD };
+#define WINNERSCORE 10
+
+enum Difficulty
+{
+    EASY,
+    MEDIUM,
+    HARD
+};
 Difficulty currentDifficulty = MEDIUM;
 
 // Armazena o estado das teclas
@@ -34,11 +41,11 @@ float ballYSpeed = 5.0f;
 int score1 = 0;
 int score2 = 0;
 
-// Especial
-int specialPlayer1 = 0;
-int specialPlayer2 = 0;
+// Campeão: 1 = playerLeft win | 2 = playerRight win
+int winner = 0;
 
-void setDifficulty(Difficulty difficulty) {
+void setDifficulty(Difficulty difficulty)
+{
     switch (difficulty)
     {
     case EASY:
@@ -56,7 +63,7 @@ void setDifficulty(Difficulty difficulty) {
         ballYSpeed = 8.0f;
         barHeight = 50.0f;
         break;
-    
+
     default:
         break;
     }
@@ -92,7 +99,7 @@ void playerLeft()
     glEnd();
 }
 
-void playerRigth(int barHeight)
+void playerRight(int barHeight)
 {
     glBegin(GL_QUADS);
     glVertex2f(width, bar2Y);
@@ -116,63 +123,95 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // EspecialPlayer1
-    glRasterPos2f(50, height - 50);
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + specialPlayer1);
+    // Se ainda não existir um campeão
+    if (winner == 0)
+    {
+        // Desenha o placar
+        glRasterPos2f(width / 2 - 50, height - 50);
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score1);
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '-');
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score2);
 
-    // EspecialPlayer1
-    glRasterPos2f(width - 50, height - 50);
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + specialPlayer2);
+        // Espaço para desenhar as barras e a bola
+        // BOLA
+        glPushMatrix();
+        ball();
+        glPopMatrix();
 
-    // Desenha o placar
-    glRasterPos2f(width / 2 - 50, height - 50);
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score1);
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '-');
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ' ');
-    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, '0' + score2);
+        // BARRA-LEFT
+        glPushMatrix();
+        playerLeft();
+        glPopMatrix();
 
-    // Espaço para desenhar as barras e a bola
-    // BOLA
-    glPushMatrix();
-    ball();
-    glPopMatrix();
-
-    // BARRA-LEFT
-    glPushMatrix();
-    playerLeft();
-    glPopMatrix();
-
-    // BARRA-RIGHT
-    glPushMatrix();
-    playerRigth(barHeight);
-    glPopMatrix();
+        // BARRA-RIGHT
+        glPushMatrix();
+        playerRight(barHeight);
+        glPopMatrix();
+    }
+    else
+    {
+        // Mensagem de vitória
+        const char *winner = (score1 == WINNERSCORE) ? "Player left win!" : "Player right win!";
+        glRasterPos2f(width / 2 - 50, height / 2);
+        for (const char *c = winner; *c != '\0'; c++)
+        {
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+        }
+    }
 
     glutSwapBuffers();
 }
 
 void update(int value)
 {
+    // Verifica se existe um vencedor
+    if (winner != 0)
+    {
+        return;
+    }
+
     // Lógica de atualização do jogo, incluindo movimentação das barras e bola
     ballX += ballXSpeed;
     ballY += ballYSpeed;
 
+    if (score1 == WINNERSCORE)
+    {
+        winner = 1;
+        return;
+    }
+
+    if (score2 == WINNERSCORE)
+    {
+        winner = 2;
+        return;
+    }
+
     // Espaço para a lógica de movimentação das barras
-    if ((keyStates['w'] || keyStates['W']) && (bar1Y + barHeight < height)) {
+    if ((keyStates['w'] || keyStates['W']) && (bar1Y + barHeight < height))
+    {
         bar1Y += 10;
-        if(bar1Y + barHeight > height) bar1Y = height - barHeight;
+        if (bar1Y + barHeight > height)
+            bar1Y = height - barHeight;
     }
-    if ((keyStates['s'] || keyStates['S']) && (bar1Y > 0)) {
+    if ((keyStates['s'] || keyStates['S']) && (bar1Y > 0))
+    {
         bar1Y -= 10;
-        if(bar1Y < 0) bar1Y = 0; 
+        if (bar1Y < 0)
+            bar1Y = 0;
     }
-    if (specialKeyStates[GLUT_KEY_UP] && bar2Y + barHeight < height) {
+    if (specialKeyStates[GLUT_KEY_UP] && bar2Y + barHeight < height)
+    {
         bar2Y += 10;
-        if(bar2Y + barHeight > height) bar2Y = height - barHeight;
+        if (bar2Y + barHeight > height)
+            bar2Y = height - barHeight;
     }
-    if (specialKeyStates[GLUT_KEY_DOWN] && bar2Y > 0) {
+    if (specialKeyStates[GLUT_KEY_DOWN] && bar2Y > 0)
+    {
         bar2Y -= 10;
-        if(bar2Y < 0) bar2Y = 0;
+        if (bar2Y < 0)
+            bar2Y = 0;
     }
 
     // Espaço para a lógica de movimentação e colisão da bola
@@ -183,15 +222,6 @@ void update(int value)
     {
         if (ballY + ballSize / 2 >= bar1Y && ballY - ballSize / 2 <= bar1Y + barHeight)
         {
-            specialPlayer1++;
-
-            if (specialPlayer1 == 3)
-            {
-                ballXSpeed = 1.5 * ballXSpeed;
-                ballYSpeed = 1.5 * ballYSpeed;
-                specialPlayer1 = 0;
-            }
-
             ballXSpeed = -ballXSpeed;
         }
     }
@@ -201,13 +231,6 @@ void update(int value)
     {
         if (ballY + ballSize / 2 >= bar2Y && ballY - ballSize / 2 <= bar2Y + barHeight)
         {
-            specialPlayer2++;
-            if (specialPlayer2 == 3)
-            {
-                ballXSpeed = 1.5 * ballXSpeed;
-                ballYSpeed = 1.5 * ballYSpeed;
-                specialPlayer2 = 0;
-            }
             ballXSpeed = -ballXSpeed;
         }
     }
@@ -229,11 +252,9 @@ void update(int value)
     {
         score1 += 1;
 
-        specialPlayer1 = 0;
-        specialPlayer2 = 0;
-
         ballX = width / 2;
         ballY = height / 2;
+        // TODO: ALTERAR PARA VELOCIDADE DA DIFICULDADE
         ballXSpeed = 5.0f;
         ballYSpeed = 5.0f;
 
@@ -249,9 +270,6 @@ void update(int value)
     if (ballX - ballSize / 2 <= 0)
     {
         score2 += 1;
-
-        specialPlayer1 = 0;
-        specialPlayer2 = 0;
 
         ballX = width / 2;
         ballY = height / 2;
@@ -300,7 +318,7 @@ int main(int argc, char **argv)
     glutSpecialFunc(handleKeysDownSpecial);
     glutSpecialUpFunc(handleKeysUpSpecial);
     glutReshapeFunc(reshape);
-    setDifficulty(EASY);
+    setDifficulty(HARD);
 
     glutMainLoop();
     return 0;
