@@ -3,7 +3,7 @@
 #include <map>
 #include <iostream>
 
-#define WINNERSCORE 1
+#define WINNERSCORE 9
 
 enum Difficulty
 {
