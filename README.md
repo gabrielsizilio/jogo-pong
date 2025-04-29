@@ -87,12 +87,10 @@ pong.exe
 ```
 
 ## 📷 Capturas de Tela
-<div align="center">
   <img src="./assets/pong-1.png" alt="Print 1" width="600px" style="margin: 10px;"/>
   <img src="./assets/pong-2.png" alt="Print 2" width="600px" style="margin: 10px;"/><br/>
+  <img src="./assets/pong-4.png" alt="Print 4" width="600px" style="margin: 10px;"/><br/>
   <img src="./assets/pong-3.png" alt="Print 3" width="600px" style="margin: 10px;"/>
-  <img src="./assets/pong-4.png" alt="Print 4" width="00px" style="margin: 10px;"/>
-</div>
 
 ## Contribuidores 😎
 
